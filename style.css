@@ -2,15 +2,16 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: system-ui, sans-serif;
 }
 
 body {
   background: black;
-  overflow-x: hidden;
   color: white;
+  overflow-x: hidden;
 }
 
+/* Sections */
 .section {
   height: 100vh;
   position: relative;
@@ -20,12 +21,8 @@ body {
   overflow: hidden;
 }
 
-.filler {
-  background: black;
-}
-
-/* Center text */
-.center-text {
+/* Hero text */
+.hero-text {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -34,17 +31,18 @@ body {
   text-align: center;
 }
 
-.center-text h1 {
+.hero-text h1 {
   font-size: 4.5rem;
   background: linear-gradient(90deg, #9333ea, #ec4899);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 30px rgba(236,72,153,0.35);
+  text-shadow: 0 0 35px rgba(236,72,153,0.35);
 }
 
-.center-text p {
+.subtitle {
+  display: block;
   margin-top: 12px;
-  opacity: 0.7;
+  opacity: 0.6;
   letter-spacing: 3px;
 }
 
@@ -53,4 +51,33 @@ canvas {
   position: fixed;
   inset: 0;
   z-index: 1;
+}
+
+/* Manifesto */
+.manifesto {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 10vw;
+  gap: 16px;
+}
+
+.line {
+  font-size: 2rem;
+  opacity: 0;
+  transform: translateY(40px);
+}
+
+.accent {
+  background: linear-gradient(90deg, #9333ea, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.spacer {
+  height: 40px;
+}
+
+.void {
+  background: black;
 }
