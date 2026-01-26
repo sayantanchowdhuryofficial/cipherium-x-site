@@ -1,30 +1,109 @@
-const scene = new THREE.Scene();
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
-const camera = new THREE.PerspectiveCamera(
-  75, window.innerWidth / window.innerHeight, 0.1, 1000
-);
+canvas.width = innerWidth;
+canvas.height = innerHeight;
 
-const renderer = new THREE.WebGLRenderer({
-  canvas: document.querySelector('#bg'),
-  alpha: true
+let scrollY = 0;
+
+window.addEventListener("scroll", () => {
+  scrollY = window.scrollY;
 });
 
-renderer.setSize(window.innerWidth, window.innerHeight);
-camera.position.z = 3;
+window.addEventListener("resize", () => {
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
+  init();
+});
 
-const geometry = new THREE.TorusGeometry(1, 0.4, 16, 100);
-const material = new THREE.MeshStandardMaterial({ color: 0x00ffff });
-const torus = new THREE.Mesh(geometry, material);
-scene.add(torus);
+const mouse = { x: null, y: null, radius: 160 };
 
-const light = new THREE.PointLight(0xffffff, 1);
-light.position.set(5, 5, 5);
-scene.add(light);
+window.addEventListener("mousemove", e => {
+  mouse.x = e.x;
+  mouse.y = e.y;
+});
+
+class Node {
+  constructor(depth) {
+    this.depth = depth;
+    this.reset();
+  }
+
+  reset() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.z = Math.random() * this.depth;
+    this.size = Math.random() * 2 + 0.5;
+    this.speed = Math.random() * 0.4 + 0.1;
+  }
+
+  update() {
+    this.y += this.speed + scrollY * 0.00005 * this.depth;
+
+    const dx = mouse.x - this.x;
+    const dy = mouse.y - this.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist < mouse.radius) {
+      this.x -= dx / 15;
+      this.y -= dy / 15;
+    }
+
+    if (this.y > canvas.height) {
+      this.y = 0;
+      this.x = Math.random() * canvas.width;
+    }
+  }
+
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size * this.depth, 0, Math.PI * 2);
+    ctx.fillStyle = "white";
+    ctx.fill();
+  }
+}
+
+let nodes = [];
+
+function init() {
+  nodes = [];
+  const density = Math.floor((canvas.width * canvas.height) / 6000);
+
+  for (let i = 0; i < density; i++) {
+    nodes.push(new Node(Math.random() * 1.8 + 0.3));
+  }
+}
+
+function connect() {
+  for (let a = 0; a < nodes.length; a++) {
+    for (let b = a; b < nodes.length; b++) {
+      const dx = nodes[a].x - nodes[b].x;
+      const dy = nodes[a].y - nodes[b].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < 90) {
+        ctx.strokeStyle = `rgba(255,255,255,${1 - dist / 90})`;
+        ctx.lineWidth = 0.4;
+        ctx.beginPath();
+        ctx.moveTo(nodes[a].x, nodes[a].y);
+        ctx.lineTo(nodes[b].x, nodes[b].y);
+        ctx.stroke();
+      }
+    }
+  }
+}
 
 function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  nodes.forEach(n => {
+    n.update();
+    n.draw();
+  });
+
+  connect();
   requestAnimationFrame(animate);
-  torus.rotation.x += 0.005;
-  torus.rotation.y += 0.01;
-  renderer.render(scene, camera);
 }
+
+init();
 animate();
