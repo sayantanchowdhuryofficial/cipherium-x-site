@@ -5,10 +5,7 @@ canvas.width = innerWidth;
 canvas.height = innerHeight;
 
 let scrollY = 0;
-
-window.addEventListener("scroll", () => {
-  scrollY = window.scrollY;
-});
+window.addEventListener("scroll", () => scrollY = window.scrollY);
 
 window.addEventListener("resize", () => {
   canvas.width = innerWidth;
@@ -16,13 +13,13 @@ window.addEventListener("resize", () => {
   init();
 });
 
-const mouse = { x: null, y: null, radius: 160 };
-
+const mouse = { x: null, y: null, radius: 180 };
 window.addEventListener("mousemove", e => {
   mouse.x = e.x;
   mouse.y = e.y;
 });
 
+/* === ANTIMATTER NODES === */
 class Node {
   constructor(depth) {
     this.depth = depth;
@@ -32,21 +29,20 @@ class Node {
   reset() {
     this.x = Math.random() * canvas.width;
     this.y = Math.random() * canvas.height;
-    this.z = Math.random() * this.depth;
-    this.size = Math.random() * 2 + 0.5;
-    this.speed = Math.random() * 0.4 + 0.1;
+    this.size = Math.random() * 1.5 + 0.5;
+    this.speed = Math.random() * 0.3 + 0.1;
   }
 
   update() {
-    this.y += this.speed + scrollY * 0.00005 * this.depth;
+    this.y += this.speed + scrollY * 0.00004 * this.depth;
 
     const dx = mouse.x - this.x;
     const dy = mouse.y - this.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
 
     if (dist < mouse.radius) {
-      this.x -= dx / 15;
-      this.y -= dy / 15;
+      this.x -= dx / 18;
+      this.y -= dy / 18;
     }
 
     if (this.y > canvas.height) {
@@ -67,43 +63,52 @@ let nodes = [];
 
 function init() {
   nodes = [];
-  const density = Math.floor((canvas.width * canvas.height) / 6000);
-
+  const density = (canvas.width * canvas.height) / 5000;
   for (let i = 0; i < density; i++) {
-    nodes.push(new Node(Math.random() * 1.8 + 0.3));
+    nodes.push(new Node(Math.random() * 1.6 + 0.4));
   }
 }
 
 function connect() {
-  for (let a = 0; a < nodes.length; a++) {
-    for (let b = a; b < nodes.length; b++) {
-      const dx = nodes[a].x - nodes[b].x;
-      const dy = nodes[a].y - nodes[b].y;
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i; j < nodes.length; j++) {
+      const dx = nodes[i].x - nodes[j].x;
+      const dy = nodes[i].y - nodes[j].y;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
-      if (dist < 90) {
-        ctx.strokeStyle = `rgba(255,255,255,${1 - dist / 90})`;
-        ctx.lineWidth = 0.4;
+      if (dist < 80) {
+        ctx.strokeStyle = `rgba(255,255,255,${1 - dist / 80})`;
+        ctx.lineWidth = 0.35;
         ctx.beginPath();
-        ctx.moveTo(nodes[a].x, nodes[a].y);
-        ctx.lineTo(nodes[b].x, nodes[b].y);
+        ctx.moveTo(nodes[i].x, nodes[i].y);
+        ctx.lineTo(nodes[j].x, nodes[j].y);
         ctx.stroke();
       }
     }
   }
 }
 
+/* === SCENE LOOP === */
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  nodes.forEach(n => {
-    n.update();
-    n.draw();
-  });
-
+  nodes.forEach(n => { n.update(); n.draw(); });
   connect();
   requestAnimationFrame(animate);
 }
 
 init();
 animate();
+
+/* === MANIFESTO REVEAL (anime.js philosophy) === */
+const lines = document.querySelectorAll(".line");
+
+window.addEventListener("scroll", () => {
+  lines.forEach((line, i) => {
+    const rect = line.getBoundingClientRect();
+    if (rect.top < innerHeight * 0.85) {
+      line.style.transition = "all 0.8s cubic-bezier(.19,1,.22,1)";
+      line.style.opacity = 1;
+      line.style.transform = "translateY(0)";
+    }
+  });
+});
