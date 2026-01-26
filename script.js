@@ -5,7 +5,10 @@ canvas.width = innerWidth;
 canvas.height = innerHeight;
 
 let scrollY = 0;
-window.addEventListener("scroll", () => scrollY = window.scrollY);
+
+window.addEventListener("scroll", () => {
+  scrollY = window.scrollY;
+});
 
 window.addEventListener("resize", () => {
   canvas.width = innerWidth;
@@ -14,12 +17,12 @@ window.addEventListener("resize", () => {
 });
 
 const mouse = { x: null, y: null, radius: 180 };
+
 window.addEventListener("mousemove", e => {
   mouse.x = e.x;
   mouse.y = e.y;
 });
 
-/* === ANTIMATTER NODES === */
 class Node {
   constructor(depth) {
     this.depth = depth;
@@ -34,7 +37,7 @@ class Node {
   }
 
   update() {
-    this.y += this.speed + scrollY * 0.00004 * this.depth;
+    this.y += this.speed + scrollY * 0.00008 * this.depth;
 
     const dx = mouse.x - this.x;
     const dy = mouse.y - this.y;
@@ -63,35 +66,40 @@ let nodes = [];
 
 function init() {
   nodes = [];
-  const density = (canvas.width * canvas.height) / 5000;
+  const density = Math.floor((canvas.width * canvas.height) / 5000);
+
   for (let i = 0; i < density; i++) {
-    nodes.push(new Node(Math.random() * 1.6 + 0.4));
+    nodes.push(new Node(Math.random() * 2 + 0.3));
   }
 }
 
 function connect() {
-  for (let i = 0; i < nodes.length; i++) {
-    for (let j = i; j < nodes.length; j++) {
-      const dx = nodes[i].x - nodes[j].x;
-      const dy = nodes[i].y - nodes[j].y;
+  for (let a = 0; a < nodes.length; a++) {
+    for (let b = a; b < nodes.length; b++) {
+      const dx = nodes[a].x - nodes[b].x;
+      const dy = nodes[a].y - nodes[b].y;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
-      if (dist < 80) {
-        ctx.strokeStyle = `rgba(255,255,255,${1 - dist / 80})`;
+      if (dist < 100) {
+        ctx.strokeStyle = `rgba(255,255,255,${1 - dist / 100})`;
         ctx.lineWidth = 0.35;
         ctx.beginPath();
-        ctx.moveTo(nodes[i].x, nodes[i].y);
-        ctx.lineTo(nodes[j].x, nodes[j].y);
+        ctx.moveTo(nodes[a].x, nodes[a].y);
+        ctx.lineTo(nodes[b].x, nodes[b].y);
         ctx.stroke();
       }
     }
   }
 }
 
-/* === SCENE LOOP === */
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  nodes.forEach(n => { n.update(); n.draw(); });
+
+  nodes.forEach(n => {
+    n.update();
+    n.draw();
+  });
+
   connect();
   requestAnimationFrame(animate);
 }
@@ -99,14 +107,13 @@ function animate() {
 init();
 animate();
 
-/* === MANIFESTO REVEAL (anime.js philosophy) === */
+/* anime.js-style reveal */
 const lines = document.querySelectorAll(".line");
 
 window.addEventListener("scroll", () => {
-  lines.forEach((line, i) => {
+  lines.forEach(line => {
     const rect = line.getBoundingClientRect();
     if (rect.top < innerHeight * 0.85) {
-      line.style.transition = "all 0.8s cubic-bezier(.19,1,.22,1)";
       line.style.opacity = 1;
       line.style.transform = "translateY(0)";
     }
