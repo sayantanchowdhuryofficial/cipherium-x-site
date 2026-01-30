@@ -15,36 +15,48 @@ addEventListener("mousemove", e => {
   mouse.y = e.clientY;
 });
 
-/* Infinity ribbon */
-const layers = 9;           // thickness
-const dotsPerLayer = 140;   // density
-const baseRadius = Math.min(w, h) * 0.28;
+/* Halftone infinity surface */
+const T_STEPS = 220;   // along the curve
+const W_STEPS = 22;    // ribbon thickness
+const R = Math.min(w, h) * 0.26;
 
 function draw() {
   ctx.clearRect(0, 0, w, h);
 
-  for (let l = 0; l < layers; l++) {
-    const offset = (l - layers / 2) * 2;
+  for (let i = 0; i < T_STEPS; i++) {
+    const t = (Math.PI * 2 / T_STEPS) * i;
 
-    for (let i = 0; i < dotsPerLayer; i++) {
-      const t = (Math.PI * 2 / dotsPerLayer) * i;
+    // Core infinity curve (lemniscate-like)
+    const cx = Math.sin(t);
+    const cy = Math.sin(t) * Math.cos(t);
 
-      const x = Math.sin(t);
-      const y = Math.sin(t) * Math.cos(t);
+    // Fake depth (front/back of ribbon)
+    const depth = Math.cos(t);
+    const depthNorm = (depth + 1) / 2;
 
-      const cx = w / 2 + x * baseRadius * 2;
-      const cy = h / 2 + y * baseRadius * 2 + offset;
+    for (let j = -W_STEPS; j <= W_STEPS; j++) {
+      const widthFactor = 1 - Math.abs(j) / W_STEPS;
 
-      const dx = mouse.x - cx;
-      const dy = mouse.y - cy;
+      const x = w / 2 + cx * R * 2;
+      const y = h / 2 + cy * R * 2 + j * 2;
+
+      // Mouse bulge (radius only)
+      const dx = mouse.x - x;
+      const dy = mouse.y - y;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
-      let pop = 0;
-      if (dist < 90) pop = (90 - dist) * 0.07;
+      let bulge = 0;
+      if (dist < 80) bulge = (80 - dist) * 0.05;
+
+      const radius =
+        0.6 +
+        widthFactor * 1.6 +
+        depthNorm * 1.4 +
+        bulge;
 
       ctx.beginPath();
-      ctx.fillStyle = "white";
-      ctx.arc(cx, cy, 1.2 + pop, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${0.15 + depthNorm * 0.85})`;
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
       ctx.fill();
     }
   }
