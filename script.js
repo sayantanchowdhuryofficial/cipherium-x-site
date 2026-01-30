@@ -15,50 +15,58 @@ addEventListener("mousemove", e => {
   mouse.y = e.clientY;
 });
 
-/* Halftone infinity surface */
-const T_STEPS = 220;   // along the curve
-const W_STEPS = 22;    // ribbon thickness
+/* -------- PARAMETERS -------- */
+const DOTS = 20000;              // "billions" illusion
 const R = Math.min(w, h) * 0.26;
+const THICKNESS = 38;
+let rotation = 0;
+
+/* Dot cloud */
+const points = [];
+
+for (let i = 0; i < DOTS; i++) {
+  const t = Math.random() * Math.PI * 2;
+  const wOffset = (Math.random() - 0.5) * THICKNESS;
+
+  points.push({ t, wOffset });
+}
+
+/* Lemniscate base */
+function infinity(t) {
+  const x = Math.sin(t);
+  const y = Math.sin(t) * Math.cos(t);
+  return { x, y };
+}
 
 function draw() {
   ctx.clearRect(0, 0, w, h);
+  rotation += 0.0015; // slow art rotation
 
-  for (let i = 0; i < T_STEPS; i++) {
-    const t = (Math.PI * 2 / T_STEPS) * i;
+  for (const p of points) {
+    const base = infinity(p.t + rotation);
 
-    // Core infinity curve (lemniscate-like)
-    const cx = Math.sin(t);
-    const cy = Math.sin(t) * Math.cos(t);
+    // Fake 3D twist
+    const twist = Math.cos(p.t * 2 + rotation) * p.wOffset;
 
-    // Fake depth (front/back of ribbon)
-    const depth = Math.cos(t);
-    const depthNorm = (depth + 1) / 2;
+    const x = w / 2 + base.x * R * 2 + Math.cos(p.t) * twist;
+    const y = h / 2 + base.y * R * 2 + Math.sin(p.t) * twist;
 
-    for (let j = -W_STEPS; j <= W_STEPS; j++) {
-      const widthFactor = 1 - Math.abs(j) / W_STEPS;
+    // Depth shading
+    const depth = (Math.cos(p.t + rotation) + 1) / 2;
 
-      const x = w / 2 + cx * R * 2;
-      const y = h / 2 + cy * R * 2 + j * 2;
+    // Mouse bulge (radius only)
+    const dx = mouse.x - x;
+    const dy = mouse.y - y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    let bulge = 0;
+    if (dist < 90) bulge = (90 - dist) * 0.04;
 
-      // Mouse bulge (radius only)
-      const dx = mouse.x - x;
-      const dy = mouse.y - y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
+    const radius = 0.6 + depth * 1.6 + bulge;
 
-      let bulge = 0;
-      if (dist < 80) bulge = (80 - dist) * 0.05;
-
-      const radius =
-        0.6 +
-        widthFactor * 1.6 +
-        depthNorm * 1.4 +
-        bulge;
-
-      ctx.beginPath();
-      ctx.fillStyle = `rgba(255,255,255,${0.15 + depthNorm * 0.85})`;
-      ctx.arc(x, y, radius, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(255,255,255,${0.15 + depth * 0.85})`;
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   requestAnimationFrame(draw);
