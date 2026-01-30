@@ -2,7 +2,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Segoe UI", system-ui, sans-serif;
+  font-family: system-ui, sans-serif;
 }
 
 body {
@@ -11,75 +11,41 @@ body {
   overflow-x: hidden;
 }
 
-/* Sections */
-.section {
-  height: 100vh;
-  position: relative;
+/* Fake vertical scroll */
+.scroll-space {
+  height: 400vh;
 }
 
-.hero {
+/* Fixed scene */
+.scene {
+  position: fixed;
+  inset: 0;
   overflow: hidden;
 }
 
-.void {
-  background: black;
-}
-
-/* Canvas */
-canvas {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-}
-
-/* HERO TEXT */
-.hero-text {
-  position: absolute;
-  inset: 0;
+/* Horizontal track */
+.track {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
+  height: 100vh;
+  width: 400vw;
+  will-change: transform;
 }
 
-.hero-text h1 {
-  font-size: clamp(3rem, 8vw, 6rem);
-  background: linear-gradient(90deg, #9333ea, #ec4899);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  letter-spacing: 1px;
-}
-
-.hero-text p {
-  margin-top: 12px;
-  opacity: 0.6;
-  letter-spacing: 3px;
-  font-size: 0.9rem;
-}
-
-/* MANIFESTO */
-.manifesto {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+/* Panels */
+.panel {
+  width: 100vw;
+  height: 100vh;
   padding-left: 12vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   gap: 14px;
+  font-size: 2rem;
 }
 
-.line {
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
-  opacity: 0;
-  transform: translateY(40px);
-  transition: all 0.9s ease;
-}
-
-.line.accent {
+/* Accent text */
+.accent {
   background: linear-gradient(90deg, #9333ea, #ec4899);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-}
-
-.spacer {
-  height: 40px;
 }
