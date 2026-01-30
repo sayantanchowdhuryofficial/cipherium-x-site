@@ -3,52 +3,51 @@ const ctx = canvas.getContext("2d");
 
 let w, h;
 function resize() {
-  w = canvas.width = window.innerWidth;
-  h = canvas.height = window.innerHeight;
+  w = canvas.width = innerWidth;
+  h = canvas.height = innerHeight;
 }
-window.addEventListener("resize", resize);
+addEventListener("resize", resize);
 resize();
 
-const mouse = { x: 0, y: 0 };
-window.addEventListener("mousemove", e => {
+const mouse = { x: -9999, y: -9999 };
+addEventListener("mousemove", e => {
   mouse.x = e.clientX;
   mouse.y = e.clientY;
 });
 
-/* Infinity math */
-const dots = [];
-const DOT_COUNT = 420;
-const R = Math.min(w, h) * 0.25;
-
-for (let i = 0; i < DOT_COUNT; i++) {
-  const t = (Math.PI * 2 / DOT_COUNT) * i;
-  dots.push({ t });
-}
+/* Infinity ribbon */
+const layers = 9;           // thickness
+const dotsPerLayer = 140;   // density
+const baseRadius = Math.min(w, h) * 0.28;
 
 function draw() {
   ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = "white";
 
-  dots.forEach(d => {
-    const x = R * Math.sin(d.t);
-    const y = R * Math.sin(d.t) * Math.cos(d.t);
+  for (let l = 0; l < layers; l++) {
+    const offset = (l - layers / 2) * 2;
 
-    const cx = w / 2 + x * 2;
-    const cy = h / 2 + y * 2;
+    for (let i = 0; i < dotsPerLayer; i++) {
+      const t = (Math.PI * 2 / dotsPerLayer) * i;
 
-    const dx = mouse.x - cx;
-    const dy = mouse.y - cy;
-    const dist = Math.sqrt(dx * dx + dy * dy);
+      const x = Math.sin(t);
+      const y = Math.sin(t) * Math.cos(t);
 
-    let pop = 0;
-    if (dist < 80) {
-      pop = (80 - dist) * 0.08; // 5–7px pop
+      const cx = w / 2 + x * baseRadius * 2;
+      const cy = h / 2 + y * baseRadius * 2 + offset;
+
+      const dx = mouse.x - cx;
+      const dy = mouse.y - cy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      let pop = 0;
+      if (dist < 90) pop = (90 - dist) * 0.07;
+
+      ctx.beginPath();
+      ctx.fillStyle = "white";
+      ctx.arc(cx, cy, 1.2 + pop, 0, Math.PI * 2);
+      ctx.fill();
     }
-
-    ctx.beginPath();
-    ctx.arc(cx, cy, 1.6 + pop, 0, Math.PI * 2);
-    ctx.fill();
-  });
+  }
 
   requestAnimationFrame(draw);
 }
